@@ -148,6 +148,7 @@ input[type="text"], input[type="number"], select {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
+  white-space: pre-line; /* <-- adiciona esta linha */
 }
 .materiais { margin-top: 12px; }
 ul { margin: 0; padding-left: 18px; }
