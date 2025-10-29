@@ -15,6 +15,7 @@
   </header>
 
   <main class="container">
+    <!-- DADOS DO COMPRADOR -->
     <section class="card">
       <h2 class="card-title">Dados do comprador</h2>
       <div class="controls">
@@ -27,7 +28,7 @@
           <input id="faccao" type="text" placeholder="Ex: Eastside Ballas">
         </div>
 
-        <!-- Mantive o id "tipo" para evitar mudanças no JS -->
+        <!-- Mantemos o id "tipo" como no original, agora representando o % de desconto -->
         <div class="field">
           <label>Desconto</label>
           <select id="tipo">
@@ -39,7 +40,7 @@
           </select>
         </div>
 
-        <!-- NOVO: upgrade entregue -->
+        <!-- Checkbox upgrade -->
         <label class="checkline">
           <input id="upgrade" type="checkbox">
           Upgrade entregue (–$10.000,00)
@@ -47,20 +48,47 @@
       </div>
     </section>
 
+    <!-- PRODUTOS -->
     <section class="card">
       <h2 class="card-title">Produtos</h2>
-      <div id="categorias" class="categorias"></div>
+
+      <!-- Categoria: Pistola (layout igual ao original, sem detalhes; só nome e quantidade) -->
+      <div class="categorias">
+        <div class="categoria">
+          <h3 class="categoria-title">Pistola</h3>
+          <div class="produtos">
+            <div class="item">
+              <h4>Five Seven</h4>
+              <div class="field">
+                <label>Quantidade</label>
+                <input id="qty_fiveseven" type="number" min="0" step="1" value="0">
+              </div>
+            </div>
+
+            <div class="item">
+              <h4>M1911</h4>
+              <div class="field">
+                <label>Quantidade</label>
+                <input id="qty_m1911" type="number" min="0" step="1" value="0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="controls">
         <button class="btn" id="calcular">Calcular</button>
         <button class="btn outline" id="limpar">Limpar</button>
       </div>
     </section>
 
+    <!-- ORÇAMENTO -->
     <section class="card">
       <h2 class="card-title">Orçamento</h2>
       <div id="resultado" class="resumo">
         <p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>
       </div>
+
       <div class="materiais">
         <h3>Materiais usados</h3>
         <ul id="materiais"></ul>
@@ -68,6 +96,7 @@
     </section>
   </main>
 
+  <!-- Mantém o mesmo gate de acesso do seu original -->
   <script>
     const access = sessionStorage.getItem('ballas_access');
     if (access !== 'user' && access !== 'admin') { window.location.href = 'login.html'; }
