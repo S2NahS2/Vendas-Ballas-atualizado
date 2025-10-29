@@ -78,13 +78,13 @@ input[type="text"], input[type="number"], select {
 .btn:hover { filter: brightness(1.05); }
 .btn.outline { background: transparent; border: 1px solid rgba(255,255,255,.22); }
 
-/* ——— alinhamento do checkbox upgrade ——— */
-.checkline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* ===== Linha de checkbox (Upgrade entregue) ===== */
+.checkline{
+  display:flex;
+  align-items:center;
+  gap:8px;
   color: var(--muted);
-  font-size: 13px;
+  font-size:13px;
 }
 
 /* ===== Categorias ===== */
@@ -136,9 +136,9 @@ input[type="text"], input[type="number"], select {
 .item .small {
   color: var(--muted);
   line-height: 1.25;
-  min-height: 2.8em; /* reserva ~2 linhas p/ preços → alinha o input em todos os cards */
+  min-height: 2.8em;
 }
-.item .field { margin-top: auto; } /* joga o input p/ base do card */
+.item .field { margin-top: auto; }
 .item input[type="number"] { width: 100%; }
 
 /* ===== Resumo / Materiais ===== */
@@ -158,12 +158,6 @@ ul { margin: 0; padding-left: 18px; }
 @media (min-width: 1000px) { .produtos { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 640px)  { .produtos { grid-template-columns: 1fr; } }
 
-.text-total {
-  color: #27e18a; /* verde */
-  font-weight: 700;
-}
-
-.text-sujo {
-  color: #ff5c74; /* vermelho */
-  font-weight: 700;
-}
+/* Cores do total/sujo, iguais ao original */
+.text-total { color: #27e18a; font-weight: 700; }  /* verde */
+.text-sujo  { color: #ff5c74; font-weight: 700; }  /* vermelho */
