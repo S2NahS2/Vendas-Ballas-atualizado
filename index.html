@@ -1,27 +1,27 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Ballas • Orçamento</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
   <header class="container">
-    <h1>Ballas • Orçamento</h1>
+    <h1>BALLAS • ORÇAMENTO</h1>
   </header>
 
   <main class="container">
     <section class="card">
       <h2>Dados do comprador</h2>
-      <div class="grid-4">
+      <div class="grid-3">
         <div class="field">
           <label for="buyerName">Nome do comprador</label>
-          <input id="buyerName" type="text" placeholder="Nome">
+          <input id="buyerName" type="text" placeholder="Nome"/>
         </div>
         <div class="field">
           <label for="buyerFaction">Nome da facção</label>
-          <input id="buyerFaction" type="text" placeholder="Ex: Eastside Ballas">
+          <input id="buyerFaction" type="text" placeholder="Ex: Eastside Ballas"/>
         </div>
         <div class="field">
           <label for="discountKind">Desconto</label>
@@ -33,14 +33,8 @@
             <option value="20">Interno — 20%</option>
           </select>
         </div>
-        <div class="field">
-          <label>&nbsp;</label>
-          <label class="checkbox big">
-            <input type="checkbox" id="upgradeToggle">
-            <span>Upgrade entregue (–$10.000,00)</span>
-          </label>
-        </div>
       </div>
+      <label class="checkline"><input id="upgradeToggle" type="checkbox"/> Upgrade entregue (–$ 10.000,00)</label>
     </section>
 
     <section class="card">
@@ -50,17 +44,20 @@
         <div class="grid-2">
           <div class="product">
             <div class="prod-title">Five Seven</div>
-            <label class="small" for="qty_fiveseven">Quantidade</label>
-            <input id="qty_fiveseven" type="number" min="0" step="1" value="0">
+            <div class="row">
+              <label for="qty_fiveseven">Quantidade</label>
+              <input id="qty_fiveseven" type="number" min="0" step="1" value="0"/>
+            </div>
           </div>
           <div class="product">
             <div class="prod-title">M1911</div>
-            <label class="small" for="qty_m1911">Quantidade</label>
-            <input id="qty_m1911" type="number" min="0" step="1" value="0">
+            <div class="row">
+              <label for="qty_m1911">Quantidade</label>
+              <input id="qty_m1911" type="number" min="0" step="1" value="0"/>
+            </div>
           </div>
         </div>
       </div>
-
       <div class="actions">
         <button id="btnCalc" class="btn primary">Calcular</button>
         <button id="btnClear" class="btn">Limpar</button>
@@ -69,14 +66,14 @@
 
     <section class="card">
       <h2>Orçamento</h2>
-      <div id="result" class="result muted">
+      <div id="result" class="panel muted">
         Preencha as quantidades e clique em <strong>Calcular</strong>.
       </div>
     </section>
 
     <section class="card">
       <h2>Materiais usados</h2>
-      <div id="materials" class="result"></div>
+      <div id="materials" class="panel"></div>
     </section>
   </main>
 
