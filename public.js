@@ -49,8 +49,8 @@ const PRODUCTS = [
     weight: 0.025,
     batch: 30,
     materials: {
-      'Cobre': 15,
-      'Frascos de pólvora': 3
+      'Cobre': 10,
+      'Frascos de pólvora': 2
     }
   },
   {
@@ -61,9 +61,9 @@ const PRODUCTS = [
     weight: 0.025,
     batch: 30,
     materials: {
-      'Alumínio': 15,
-      'Cobre': 15,
-      'Frascos de pólvora': 5
+      'Alumínio': 10,
+      'Cobre': 10,
+      'Frascos de pólvora': 3
     }
   },
   {
@@ -74,9 +74,9 @@ const PRODUCTS = [
     weight: 0.025,
     batch: 30,
     materials: {
-      'Alumínio': 30,
-      'Cobre': 30,
-      'Frascos de pólvora': 8
+      'Alumínio': 20,
+      'Cobre': 20,
+      'Frascos de pólvora': 5
     }
   }
 ];
