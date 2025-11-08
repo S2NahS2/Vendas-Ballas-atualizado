@@ -111,11 +111,6 @@ function resolveDiscounts(tipo, totalMunicoes) {
       descontoGeral = 0;
       descontoMunicao = 0;
       break;
-    case 'base10k':
-      descontoGeral = 0;
-      // Aplica +2.5% SOMENTE se total de munições ≥ 10k
-      descontoMunicao = (totalMunicoes >= 10000) ? -2.5 : 0;
-      break;
     case 'parceria':
       descontoGeral = descontoMunicao = 5; break;
     case 'parceria10k':
