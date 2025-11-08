@@ -41,7 +41,7 @@ const PRODUCTS = [
       'Peças de armas': 3
     }
   },
-  // ——— Munições (preço por unidade; batch=30 produz 30 un. por fabricação) ———
+  // ——— Munições (preço por unidade; batch=30 produz 30 un.) ———
   {
     id: 'muni_pt',
     name: 'Munição Pistola',
@@ -82,15 +82,79 @@ const PRODUCTS = [
   }
 ];
 
-const $  = (s) => document.querySelector(s);
-const fmt = (v) =>
-  '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const $   = (s) => document.querySelector(s);
+const fmt = (v) => '$' + Number(v).toLocaleString('pt-BR', {
+  minimumFractionDigits: 2, maximumFractionDigits: 2
+});
 const clone = (o) => JSON.parse(JSON.stringify(o));
+
+/**
+ * Resolve descontos para geral (armas/outros) e munição.
+ * Valores positivos = desconto; valores negativos = sobretaxa.
+ * tipo:
+ *  - base .................. 0%
+ *  - base_2_5 .............. +2.5% (sobretaxa)
+ *  - parceria .............. 5%
+ *  - parceria10k ........... 5% geral; muni 7.5% se total muni >= 10k
+ *  - parceria_especial ..... 10%
+ *  - parceria_especial10k .. 10% geral; muni 12.5% se total muni >= 10k
+ *  - alianca ............... 15%
+ *  - alianca10k ............ 15% geral; muni 17.5% se total muni >= 10k
+ *  - interno ............... 20%
+ */
+function resolveDiscounts(tipo, totalMunicoes) {
+  let descontoGeral = 0;
+  let descontoMunicao = 0;
+
+  switch (tipo) {
+    case 'base':
+      descontoGeral = 0;
+      descontoMunicao = 0;
+      break;
+    case 'base_2_5':
+      // sobretaxa de 2.5% → tratar como "desconto" negativo
+      descontoGeral = -2.5;
+      descontoMunicao = -2.5;
+      break;
+    case 'parceria':
+      descontoGeral = 5;
+      descontoMunicao = 5;
+      break;
+    case 'parceria10k':
+      descontoGeral = 5;
+      descontoMunicao = (totalMunicoes >= 10000) ? 7.5 : 5;
+      break;
+    case 'parceria_especial':
+      descontoGeral = 10;
+      descontoMunicao = 10;
+      break;
+    case 'parceria_especial10k':
+      descontoGeral = 10;
+      descontoMunicao = (totalMunicoes >= 10000) ? 12.5 : 10;
+      break;
+    case 'alianca':
+      descontoGeral = 15;
+      descontoMunicao = 15;
+      break;
+    case 'alianca10k':
+      descontoGeral = 15;
+      descontoMunicao = (totalMunicoes >= 10000) ? 17.5 : 15;
+      break;
+    case 'interno':
+      descontoGeral = 20;
+      descontoMunicao = 20;
+      break;
+    default:
+      descontoGeral = 0;
+      descontoMunicao = 0;
+  }
+  return { descontoGeral, descontoMunicao };
+}
 
 function calc() {
   const comprador       = $('#comprador').value.trim() || '—';
   const faccao          = $('#faccao').value.trim()    || '—';
-  const tipo            = $('#tipo').value;             // <— agora é string (parceria, parceria10k, etc.)
+  const tipo            = $('#tipo').value;
   const upgradeEntregue = $('#upgrade').checked;
 
   // Quantidades
@@ -115,77 +179,51 @@ function calc() {
     $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
     matsBox.textContent = '';
     excBox.textContent  = '';
-    excWrap.style.display = 'none';
+    if (excWrap) excWrap.style.display = 'none';
     return;
   }
 
-  // ===== Descontos: geral vs munição (lógica +10k) =====
+  // ——— Descontos (com lógica +10k só na munição) ———
   const totalMunicoes = qMuniPT + qMuniSub + qMuniRifle;
+  const { descontoGeral, descontoMunicao } = resolveDiscounts(tipo, totalMunicoes);
 
-  let descontoGeral   = 0;   // aplica em pistolas e demais itens
-  let descontoMunicao = 0;   // aplica SOMENTE nas munições
+  const lines      = [`${comprador} (${faccao})`];
+  let subtotal     = 0;
+  let pesoTotal    = 0;
+  const mats       = {};
+  const excedentes = [];
 
-  switch (tipo) {
-    case 'parceria':
-      descontoGeral = descontoMunicao = 5; break;
-    case 'parceria10k':
-      descontoGeral = 5;
-      descontoMunicao = (totalMunicoes >= 10000) ? 7.5 : 5;
-      break;
-    case 'parceria_especial':
-      descontoGeral = descontoMunicao = 10; break;
-    case 'parceria_especial10k':
-      descontoGeral = 10;
-      descontoMunicao = (totalMunicoes >= 10000) ? 12.5 : 10;
-      break;
-    case 'alianca':
-      descontoGeral = descontoMunicao = 15; break;
-    case 'alianca10k':
-      descontoGeral = 15;
-      descontoMunicao = (totalMunicoes >= 10000) ? 17.5 : 15;
-      break;
-    case 'interno':
-      descontoGeral = descontoMunicao = 20; break;
-    default:
-      descontoGeral = descontoMunicao = 0; break;
-  }
-
-  const lines       = [`${comprador} (${faccao})`];
-  let subtotal      = 0;
-  let pesoTotal     = 0;
-  const mats        = {};
-  const excedentes  = [];
-
-  // ===== Cálculo por item =====
+  // ——— Cálculo por item ———
   for (const { p, qty } of items) {
-    const isAmmo          = p.category === 'Munições';
+    // Detecta munição de forma robusta
+    const isAmmo = p.id.startsWith('muni_');
     const descontoAplicado = isAmmo ? descontoMunicao : descontoGeral;
 
-    // Batches (apenas p/ munição)
-    const hasBatch = Number(p.batch) > 1;
+    // Batches só para munição
+    const hasBatch = isAmmo && Number(p.batch) > 1;
     let producedBatches = 1;
-    let produced        = qty;
-    let leftover        = 0;
+    let produced = qty;
+    let leftover = 0;
 
     if (hasBatch) {
       producedBatches = Math.ceil(qty / p.batch);
-      produced        = producedBatches * p.batch;
-      leftover        = produced - qty;
+      produced = producedBatches * p.batch;
+      leftover = produced - qty;
       excedentes.push({ nome: p.name, produzido: produced, vendido: qty, sobra: leftover });
     }
 
-    // Preço unitário e total (desconto por categoria)
+    // Preço unitário considerando desconto (ou sobretaxa se negativo)
     const unitPrice = p.price * (1 - descontoAplicado / 100);
     const lineTotal = unitPrice * qty;
 
     subtotal  += lineTotal;
     pesoTotal += (p.weight || 0) * qty;
 
-    // Mostra número de batches (ex: "45 (2) × Munição Pistola")
+    // Exibe batches no texto, ex: "45 (2) × Munição Pistola"
     const batchText = (hasBatch && producedBatches > 1) ? ` (${producedBatches})` : '';
     lines.push(`• ${qty}${batchText} × ${p.name} = ${fmt(lineTotal)}`);
 
-    // Materiais (para munição usa producedBatches; armas usam qty)
+    // Materiais (munição usa producedBatches; armas usam qty)
     const mm = clone(p.materials);
     if (upgradeEntregue && mm['Upgrade pistola'] != null) delete mm['Upgrade pistola'];
 
@@ -195,14 +233,14 @@ function calc() {
     }
   }
 
-  // ===== Totais finais =====
+  // ——— Totais finais ———
   let total = subtotal;
   if (upgradeEntregue) total -= 10000;
   if (total < 0) total = 0;
 
   const valorSujo = total * 1.30;
 
-  // ===== Render: Orçamento =====
+  // ——— Render: Orçamento ———
   const resumoHtml =
     lines.join('\n') +
     '\n\n' +
@@ -212,30 +250,31 @@ function calc() {
 
   $('#resultado').innerHTML = resumoHtml;
 
-  // ===== Render: Materiais =====
+  // ——— Render: Materiais ———
   const matsText = Object.entries(mats)
     .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))
     .map(([nome, qtd]) => `• ${nome}: ${qtd}`)
     .join('\n');
+
   matsBox.textContent = matsText || '—';
 
-  // ===== Render: Excedentes =====
+  // ——— Render: Excedentes ———
   if (excedentes.length > 0) {
     const excText = excedentes
       .map(e => `• ${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`)
       .join('\n');
     excBox.textContent = excText;
-    excWrap.style.display = '';
+    if (excWrap) excWrap.style.display = '';
   } else {
     excBox.textContent = '';
-    excWrap.style.display = 'none';
+    if (excWrap) excWrap.style.display = 'none';
   }
 }
 
 function clearAll() {
   $('#comprador').value = '';
   $('#faccao').value = '';
-  $('#tipo').value = '0';
+  $('#tipo').value = 'base';
   $('#upgrade').checked = false;
 
   ['qty_fiveseven','qty_m1911','qty_muni_pt','qty_muni_sub','qty_muni_rifle'].forEach(id => {
@@ -244,11 +283,12 @@ function clearAll() {
   });
 
   $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
-  document.getElementById('materiais').textContent = '';
+  const matsBox = document.getElementById('materiais');
   const excWrap = document.getElementById('excedentes-wrap');
   const excBox  = document.getElementById('excedentes');
-  excBox.textContent = '';
-  excWrap.style.display = 'none';
+  if (matsBox) matsBox.textContent = '';
+  if (excBox)  excBox.textContent  = '';
+  if (excWrap) excWrap.style.display = 'none';
 }
 
 document.getElementById('calcular').addEventListener('click', calc);
