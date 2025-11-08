@@ -179,5 +179,6 @@ ul { margin: 0; padding-left: 18px; list-style: none; }
 .text-sujo  { color: #ff5c74; font-weight: 700; }  /* vermelho */
 
 /* opcional: deixa os blocos abaixo do título com o mesmo respiro do orçamento */
-.materiais h3 { margin: 16px 0 8px; }
+.materiais h3 { margin: 18px 0 10px; }
+.resumo { margin-top: 12px; white-space: pre-line; }
 
