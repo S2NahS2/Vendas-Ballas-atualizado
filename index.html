@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
   <header class="hero">
     <h1 class="logo">Ballas • Orçamento</h1>
@@ -29,7 +28,6 @@
           <input id="faccao" type="text" placeholder="Ex: Eastside Ballas">
         </div>
 
-        <!-- Seleção de desconto -->
         <div class="field">
           <label>Desconto</label>
           <select id="tipo">
@@ -41,7 +39,6 @@
           </select>
         </div>
 
-        <!-- Checkbox upgrade -->
         <label class="checkline">
           <input id="upgrade" type="checkbox">
           Upgrade entregue (–$10.000,00)
@@ -54,8 +51,7 @@
       <h2 class="card-title">Produtos</h2>
 
       <div class="categorias">
-
-        <!-- Categoria: Pistola -->
+        <!-- ===== Categoria: Pistola ===== -->
         <div class="categoria">
           <h3 class="categoria-title">Pistola</h3>
           <div class="produtos">
@@ -77,14 +73,14 @@
           </div>
         </div>
 
-        <!-- Categoria: Munições -->
+        <!-- ===== Categoria: Munições ===== -->
         <div class="categoria">
           <h3 class="categoria-title">Munições</h3>
           <div class="produtos">
             <div class="item">
               <h4>Munição Pistola</h4>
               <div class="field">
-                <label>Quantidade</label>
+                <label>Quantidade (unidades)</label>
                 <input id="qty_muni_pt" type="number" min="0" step="1" value="0">
               </div>
             </div>
@@ -92,7 +88,7 @@
             <div class="item">
               <h4>Munição Sub</h4>
               <div class="field">
-                <label>Quantidade</label>
+                <label>Quantidade (unidades)</label>
                 <input id="qty_muni_sub" type="number" min="0" step="1" value="0">
               </div>
             </div>
@@ -100,16 +96,14 @@
             <div class="item">
               <h4>Munição Rifle</h4>
               <div class="field">
-                <label>Quantidade</label>
+                <label>Quantidade (unidades)</label>
                 <input id="qty_muni_rifle" type="number" min="0" step="1" value="0">
               </div>
             </div>
           </div>
         </div>
-
       </div>
 
-      <!-- Botões -->
       <div class="controls">
         <button class="btn" id="calcular">Calcular</button>
         <button class="btn outline" id="limpar">Limpar</button>
@@ -130,15 +124,10 @@
     </section>
   </main>
 
-  <!-- Verificação de acesso -->
   <script>
     const access = sessionStorage.getItem('ballas_access');
-    if (access !== 'user' && access !== 'admin') { 
-      window.location.href = 'login.html'; 
-    }
+    if (access !== 'user' && access !== 'admin') { window.location.href = 'login.html'; }
   </script>
-  
-  <!-- Script principal -->
   <script src="public.js"></script>
 </body>
 </html>
