@@ -45,9 +45,9 @@ const PRODUCTS = [
     id: 'muni_pt',
     name: 'Munição Pistola',
     category: 'Munições',
-    price: 150,
-    weight: 0.025,
-    batch: 30,
+    price: 150,      // preço por unidade vendida
+    weight: 0.025,   // peso por unidade vendida
+    batch: 30,       // fabrica 30 por batch
     materials: {
       'Cobre': 15,
       'Frascos de pólvora': 3
@@ -81,34 +81,39 @@ const PRODUCTS = [
   }
 ];
 
-const $ = (s) => document.querySelector(s);
+const $   = (s) => document.querySelector(s);
 const fmt = (v) => '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
 function calc() {
-  const comprador = $('#comprador').value.trim() || '—';
-  const faccao = $('#faccao').value.trim() || '—';
-  const descontoPct = parseFloat($('#tipo').value || '0') || 0;
+  const comprador      = $('#comprador').value.trim() || '—';
+  const faccao         = $('#faccao').value.trim() || '—';
+  const descontoPct    = parseFloat($('#tipo').value || '0') || 0;
   const upgradeEntregue = $('#upgrade').checked;
 
   // Quantidades
-  const qFS = parseInt($('#qty_fiveseven').value || '0', 10) || 0;
-  const qM = parseInt($('#qty_m1911').value || '0', 10) || 0;
-  const qMuniPT = parseInt($('#qty_muni_pt')?.value || '0', 10) || 0;
-  const qMuniSub = parseInt($('#qty_muni_sub')?.value || '0', 10) || 0;
+  const qFS        = parseInt($('#qty_fiveseven').value || '0', 10) || 0;
+  const qM         = parseInt($('#qty_m1911').value     || '0', 10) || 0;
+  const qMuniPT    = parseInt($('#qty_muni_pt')?.value    || '0', 10) || 0;
+  const qMuniSub   = parseInt($('#qty_muni_sub')?.value   || '0', 10) || 0;
   const qMuniRifle = parseInt($('#qty_muni_rifle')?.value || '0', 10) || 0;
 
   const items = [];
-  if (qFS > 0) items.push({ p: PRODUCTS.find(x => x.id === 'fiveseven'), qty: qFS });
-  if (qM > 0) items.push({ p: PRODUCTS.find(x => x.id === 'm1911'), qty: qM });
-  if (qMuniPT > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_pt'), qty: qMuniPT });
-  if (qMuniSub > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_sub'), qty: qMuniSub });
+  if (qFS        > 0) items.push({ p: PRODUCTS.find(x => x.id === 'fiveseven'),  qty: qFS });
+  if (qM         > 0) items.push({ p: PRODUCTS.find(x => x.id === 'm1911'),      qty: qM  });
+  if (qMuniPT    > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_pt'),    qty: qMuniPT });
+  if (qMuniSub   > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_sub'),   qty: qMuniSub });
   if (qMuniRifle > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_rifle'), qty: qMuniRifle });
+
+  const excWrap = document.getElementById('excedentes-wrap');
+  const matsBox = document.getElementById('materiais');
+  const excBox  = document.getElementById('excedentes');
 
   if (!items.length) {
     $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
-    $('#materiais').innerHTML = '';
-    $('#excedentes').innerHTML = '';
+    matsBox.textContent = '';
+    excBox.textContent  = '';
+    excWrap.style.display = 'none';
     return;
   }
 
@@ -116,30 +121,30 @@ function calc() {
   let subtotal = 0;
   let pesoTotal = 0;
   const mats = {};
-  const excedentes = []; // lista detalhada de munições excedentes
+  const excedentes = []; // detalhamento de munições excedentes
 
-  // Calcular linha por linha
   for (const { p, qty } of items) {
     const unitPrice = p.price * (1 - descontoPct / 100);
+
+    // controle de produção para munições (batch)
     let produced = qty;
     let producedBatches = 1;
     let leftover = 0;
 
-    // Cálculo especial para munições
     if (p.category === 'Munições') {
       producedBatches = Math.ceil(qty / p.batch);
-      produced = producedBatches * p.batch;
-      leftover = produced - qty;
+      produced = producedBatches * p.batch; // produzido real
+      leftover = produced - qty;            // excedente
       excedentes.push({ nome: p.name, produzido: produced, vendido: qty, sobra: leftover });
     }
 
-    const lineTotal = unitPrice * qty;
-    subtotal += lineTotal;
+    const lineTotal = unitPrice * qty; // preço é calculado pelo que é vendido, não pelo produzido
+    subtotal  += lineTotal;
     pesoTotal += (p.weight || 0) * qty;
 
     lines.push(`• ${qty} × ${p.name} = ${fmt(lineTotal)}`);
 
-    // Materiais
+    // Materiais: para munições usam-se materiais por "batch produzido"
     const mm = clone(p.materials);
     if (upgradeEntregue && mm['Upgrade pistola'] != null) delete mm['Upgrade pistola'];
 
@@ -155,7 +160,7 @@ function calc() {
   if (total < 0) total = 0;
   const valorSujo = total * 1.30;
 
-  // Render principal
+  // Orçamento
   const resumoHtml =
     lines.join('\n') +
     '\n\n' +
@@ -165,30 +170,25 @@ function calc() {
 
   $('#resultado').innerHTML = resumoHtml;
 
-  // Lista de materiais
+  // Materiais usados (bullets e pre-line)
   const matsText = Object.entries(mats)
     .sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'))
-    .map(([nome, qtd]) => `${nome}: ${qtd}`)
+    .map(([nome, qtd]) => `• ${nome}: ${qtd}`)
     .join('\n');
-  $('#materiais').textContent = matsText || '—';
+  matsBox.textContent = matsText || '—';
 
-  // Bloco de munições excedentes
-  const excedentesWrap = document.getElementById('excedentes-wrap');
-
+  // Munições excedentes (bullets e pre-line + esconde quando vazio)
   if (excedentes.length > 0) {
-    // Gera o texto com quebras de linha no mesmo formato do orçamento
-    const excText = excedentes.map(e =>
-      `${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`
-    ).join('\n');
-
-    // Mostra o bloco e insere o texto formatado
-    excedentesWrap.style.display = '';
-    $('#excedentes').textContent = excText;
+    const excText = excedentes
+      .map(e => `• ${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`)
+      .join('\n');
+    excBox.textContent = excText;
+    excWrap.style.display = '';
   } else {
-    // Esconde o bloco se não houver excedentes
-    excedentesWrap.style.display = 'none';
-    $('#excedentes').textContent = '';
+    excBox.textContent = '';
+    excWrap.style.display = 'none';
   }
+} // <-- fecha calc() ✅
 
 function clearAll() {
   $('#comprador').value = '';
@@ -196,14 +196,17 @@ function clearAll() {
   $('#tipo').value = '0';
   $('#upgrade').checked = false;
 
-  ['qty_fiveseven', 'qty_m1911', 'qty_muni_pt', 'qty_muni_sub', 'qty_muni_rifle'].forEach(id => {
+  ['qty_fiveseven','qty_m1911','qty_muni_pt','qty_muni_sub','qty_muni_rifle'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '0';
   });
 
   $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
-  $('#materiais').innerHTML = '';
-  $('#excedentes').innerHTML = '';
+  document.getElementById('materiais').textContent = '';
+  const excWrap = document.getElementById('excedentes-wrap');
+  const excBox  = document.getElementById('excedentes');
+  excBox.textContent = '';
+  excWrap.style.display = 'none';
 }
 
 document.getElementById('calcular').addEventListener('click', calc);
