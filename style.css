@@ -148,17 +148,32 @@ input[type="text"], input[type="number"], select {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 10px 12px;
-  white-space: pre-line; /* <-- adiciona esta linha */
+  white-space: pre-line;
 }
 .materiais { margin-top: 12px; }
-ul { margin: 0; padding-left: 18px; }
+ul { margin: 0; padding-left: 18px; list-style: none; }
 .success { color: var(--good); font-weight: 700; }
 
-/* Responsivo extra */
+/* ===== NOVO BLOCO: Munições excedentes ===== */
+#excedentes {
+  background: rgba(122,60,255,0.1);
+  border: 1px dashed rgba(122,60,255,0.3);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-top: 10px;
+}
+#excedentes li {
+  color: #bfa9ff;
+  font-size: 14px;
+  margin-bottom: 4px;
+  text-shadow: 0 0 8px rgba(122,60,255,0.35);
+}
+
+/* ===== Responsivo extra ===== */
 @media (min-width: 1400px) { .produtos { grid-template-columns: repeat(4, 1fr); } }
 @media (min-width: 1000px) { .produtos { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 640px)  { .produtos { grid-template-columns: 1fr; } }
 
-/* Cores do total/sujo, iguais ao original */
+/* ===== Cores do total/sujo ===== */
 .text-total { color: #27e18a; font-weight: 700; }  /* verde */
 .text-sujo  { color: #ff5c74; font-weight: 700; }  /* vermelho */
