@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Permanent+Marker&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
   <header class="hero">
     <h1 class="logo">Ballas • Orçamento</h1>
@@ -28,7 +29,7 @@
           <input id="faccao" type="text" placeholder="Ex: Eastside Ballas">
         </div>
 
-        <!-- Mantemos o id "tipo" como no original, agora representando o % de desconto -->
+        <!-- Seleção de desconto -->
         <div class="field">
           <label>Desconto</label>
           <select id="tipo">
@@ -52,8 +53,9 @@
     <section class="card">
       <h2 class="card-title">Produtos</h2>
 
-      <!-- Categoria: Pistola (layout igual ao original, sem detalhes; só nome e quantidade) -->
       <div class="categorias">
+
+        <!-- Categoria: Pistola -->
         <div class="categoria">
           <h3 class="categoria-title">Pistola</h3>
           <div class="produtos">
@@ -74,8 +76,40 @@
             </div>
           </div>
         </div>
+
+        <!-- Categoria: Munições -->
+        <div class="categoria">
+          <h3 class="categoria-title">Munições</h3>
+          <div class="produtos">
+            <div class="item">
+              <h4>Munição Pistola (x30)</h4>
+              <div class="field">
+                <label>Quantidade</label>
+                <input id="qty_muni_pt" type="number" min="0" step="1" value="0">
+              </div>
+            </div>
+
+            <div class="item">
+              <h4>Munição Sub (x30)</h4>
+              <div class="field">
+                <label>Quantidade</label>
+                <input id="qty_muni_sub" type="number" min="0" step="1" value="0">
+              </div>
+            </div>
+
+            <div class="item">
+              <h4>Munição Rifle (x30)</h4>
+              <div class="field">
+                <label>Quantidade</label>
+                <input id="qty_muni_rifle" type="number" min="0" step="1" value="0">
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
+      <!-- Botões -->
       <div class="controls">
         <button class="btn" id="calcular">Calcular</button>
         <button class="btn outline" id="limpar">Limpar</button>
@@ -96,11 +130,15 @@
     </section>
   </main>
 
-  <!-- Mantém o mesmo gate de acesso do seu original -->
+  <!-- Verificação de acesso -->
   <script>
     const access = sessionStorage.getItem('ballas_access');
-    if (access !== 'user' && access !== 'admin') { window.location.href = 'login.html'; }
+    if (access !== 'user' && access !== 'admin') { 
+      window.location.href = 'login.html'; 
+    }
   </script>
+  
+  <!-- Script principal -->
   <script src="public.js"></script>
 </body>
 </html>
