@@ -111,42 +111,33 @@ function resolveDiscounts(tipo, totalMunicoes) {
       descontoGeral = 0;
       descontoMunicao = 0;
       break;
-    case 'base_2_5':
-      // sobretaxa de 2.5% → tratar como "desconto" negativo
-      descontoGeral = -2.5;
-      descontoMunicao = -2.5;
+    case 'base10k':
+      descontoGeral = 0;
+      // Aplica +2.5% SOMENTE se total de munições ≥ 10k
+      descontoMunicao = (totalMunicoes >= 10000) ? -2.5 : 0;
       break;
     case 'parceria':
-      descontoGeral = 5;
-      descontoMunicao = 5;
-      break;
+      descontoGeral = descontoMunicao = 5; break;
     case 'parceria10k':
       descontoGeral = 5;
       descontoMunicao = (totalMunicoes >= 10000) ? 7.5 : 5;
       break;
     case 'parceria_especial':
-      descontoGeral = 10;
-      descontoMunicao = 10;
-      break;
+      descontoGeral = descontoMunicao = 10; break;
     case 'parceria_especial10k':
       descontoGeral = 10;
       descontoMunicao = (totalMunicoes >= 10000) ? 12.5 : 10;
       break;
     case 'alianca':
-      descontoGeral = 15;
-      descontoMunicao = 15;
-      break;
+      descontoGeral = descontoMunicao = 15; break;
     case 'alianca10k':
       descontoGeral = 15;
       descontoMunicao = (totalMunicoes >= 10000) ? 17.5 : 15;
       break;
     case 'interno':
-      descontoGeral = 20;
-      descontoMunicao = 20;
-      break;
+      descontoGeral = descontoMunicao = 20; break;
     default:
-      descontoGeral = 0;
-      descontoMunicao = 0;
+      descontoGeral = descontoMunicao = 0;
   }
   return { descontoGeral, descontoMunicao };
 }
