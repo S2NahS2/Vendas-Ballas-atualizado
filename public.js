@@ -1,5 +1,6 @@
-// Produtos e materiais
+// =================== CATÁLOGO ===================
 const PRODUCTS = [
+  // Pistolas
   {
     id: 'fiveseven',
     name: 'Five Seven',
@@ -32,30 +33,70 @@ const PRODUCTS = [
       'Borracha': 175,
       'Peças de armas': 3
     }
+  },
+
+  // Munições — cada quantidade = 1 lote (30 unidades)
+  {
+    id: 'muni_pt',
+    name: 'Munição Pistola (x30)',
+    price: 15000,
+    weight: 0.025 * 30, // 30 unidades x 0,025 kg
+    materials: {
+      'Cobre': 15,
+      'Frascos de pólvora': 3
+    }
+  },
+  {
+    id: 'muni_sub',
+    name: 'Munição Sub (x30)',
+    price: 20000,
+    weight: 0.025 * 30,
+    materials: {
+      'Alumínio': 15,
+      'Cobre': 15,
+      'Frascos de pólvora': 5
+    }
+  },
+  {
+    id: 'muni_rifle',
+    name: 'Munição Rifle (x30)',
+    price: 25000,
+    weight: 0.025 * 30,
+    materials: {
+      'Alumínio': 30,
+      'Cobre': 30,
+      'Frascos de pólvora': 8
+    }
   }
 ];
 
-const $ = (s) => document.querySelector(s);
-const fmt = (v) => '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const $    = (s) => document.querySelector(s);
+const fmt  = (v) => '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
 function calc() {
   const comprador = $('#comprador').value.trim() || '—';
-  const faccao   = $('#faccao').value.trim() || '—';
+  const faccao    = $('#faccao').value.trim()    || '—';
 
-  // "tipo" agora representa o % de desconto (0,5,10,15,20)
+  // "tipo" = % de desconto (0, 5, 10, 15, 20)
   const descontoPct = parseFloat($('#tipo').value || '0') || 0;
 
-  // upgrade entregue → desconta 10k no total e omite "Upgrade pistola" dos materiais
+  // upgrade entregue → omite "Upgrade pistola" e -$10.000 no total
   const upgradeEntregue = $('#upgrade').checked;
 
   // quantidades
-  const qFS = parseInt($('#qty_fiveseven').value || '0', 10) || 0;
-  const qM  = parseInt($('#qty_m1911').value   || '0', 10) || 0;
+  const qFS        = parseInt($('#qty_fiveseven').value || '0', 10) || 0;
+  const qM         = parseInt($('#qty_m1911').value     || '0', 10) || 0;
+  const qMuniPT    = parseInt($('#qty_muni_pt')?.value      || '0', 10) || 0;
+  const qMuniSub   = parseInt($('#qty_muni_sub')?.value     || '0', 10) || 0;
+  const qMuniRifle = parseInt($('#qty_muni_rifle')?.value   || '0', 10) || 0;
 
   const items = [];
-  if (qFS > 0) items.push({ p: PRODUCTS[0], qty: qFS });
-  if (qM  > 0) items.push({ p: PRODUCTS[1], qty: qM  });
+  if (qFS        > 0) items.push({ p: PRODUCTS.find(x => x.id === 'fiveseven'),  qty: qFS });
+  if (qM         > 0) items.push({ p: PRODUCTS.find(x => x.id === 'm1911'),      qty: qM  });
+  if (qMuniPT    > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_pt'),    qty: qMuniPT });
+  if (qMuniSub   > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_sub'),   qty: qMuniSub });
+  if (qMuniRifle > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_rifle'), qty: qMuniRifle });
 
   if (!items.length) {
     $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
@@ -70,8 +111,13 @@ function calc() {
 
   // linhas de itens + soma de materiais
   for (const { p, qty } of items) {
-    lines.push(`• ${qty} × ${p.name} = ${fmt(p.price * qty)}`);
-    subtotal += p.price * qty;
+    // preço unitário com desconto aplicado
+    const unitPrice = p.price * (1 - descontoPct / 100);
+    const lineTotal = unitPrice * qty;
+
+    lines.push(`• ${qty} × ${p.name} = ${fmt(unitPrice)} (un.) — ${fmt(lineTotal)}`);
+
+    subtotal  += lineTotal;
     pesoTotal += (p.weight || 0) * qty;
 
     const mm = clone(p.materials);
@@ -83,16 +129,14 @@ function calc() {
     }
   }
 
-  // aplica desconto
-  let total = subtotal - (subtotal * (descontoPct / 100));
-
-  // aplica desconto fixo de upgrade (se marcado)
+  // desconto fixo de upgrade (-$10.000) se marcado
+  let total = subtotal;
   if (upgradeEntregue) total -= 10000;
-
   if (total < 0) total = 0;
+
   const valorSujo = total * 1.30;
 
-  // render do orçamento (mantendo estilo do original)
+  // resumo (Total verde, Sujo vermelho)
   const resumoHtml =
     lines.join('\n') +
     '\n\n' +
@@ -102,10 +146,10 @@ function calc() {
 
   $('#resultado').innerHTML = resumoHtml;
 
-  // materiais listados como <li>
+  // materiais (sem bullet duplicado)
   const matsLines = Object.entries(mats)
     .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))
-    .map(([nome, qtd]) => `<li>• ${nome}: ${qtd}</li>`)
+    .map(([nome, qtd]) => `<li>${nome}: ${qtd}</li>`)
     .join('');
   $('#materiais').innerHTML = matsLines || '';
 }
@@ -115,8 +159,13 @@ function clearAll() {
   $('#faccao').value = '';
   $('#tipo').value = '0';
   $('#upgrade').checked = false;
-  $('#qty_fiveseven').value = '0';
-  $('#qty_m1911').value = '0';
+
+  // zera todas as quantidades (pistolas + munições)
+  ['qty_fiveseven','qty_m1911','qty_muni_pt','qty_muni_sub','qty_muni_rifle'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '0';
+  });
+
   $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
   $('#materiais').innerHTML = '';
 }
