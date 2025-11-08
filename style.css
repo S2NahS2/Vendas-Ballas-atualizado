@@ -20,9 +20,17 @@ body {
   margin: 0;
   font-family: 'Archivo', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   color: var(--ink);
+
+  /* Fundo sólido + um único brilho no topo */
   background:
     radial-gradient(1200px 600px at 20% -10%, #2c1052 0%, transparent 60%),
-    var(--paper); /* removido o segundo gradiente para tirar a faixa roxa do rodapé */
+    var(--paper);
+
+  /* Evita repetição e “faixa” no rodapé */
+  background-repeat: no-repeat, no-repeat;
+  background-position: 20% -10%, 0 0;
+  background-size: 1200px 600px, auto;
+  background-attachment: scroll, scroll;
 }
 
 /* ======= HEADER ======= */
