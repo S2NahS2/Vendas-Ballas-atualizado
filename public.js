@@ -81,33 +81,34 @@ const PRODUCTS = [
   }
 ];
 
-const $    = (s) => document.querySelector(s);
-const fmt  = (v) => '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const $ = (s) => document.querySelector(s);
+const fmt = (v) => '$' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const clone = (o) => JSON.parse(JSON.stringify(o));
 
 function calc() {
   const comprador = $('#comprador').value.trim() || '—';
-  const faccao    = $('#faccao').value.trim()    || '—';
+  const faccao = $('#faccao').value.trim() || '—';
   const descontoPct = parseFloat($('#tipo').value || '0') || 0;
   const upgradeEntregue = $('#upgrade').checked;
 
-  // quantidades
-  const qFS        = parseInt($('#qty_fiveseven').value || '0', 10) || 0;
-  const qM         = parseInt($('#qty_m1911').value     || '0', 10) || 0;
-  const qMuniPT    = parseInt($('#qty_muni_pt')?.value      || '0', 10) || 0;
-  const qMuniSub   = parseInt($('#qty_muni_sub')?.value     || '0', 10) || 0;
-  const qMuniRifle = parseInt($('#qty_muni_rifle')?.value   || '0', 10) || 0;
+  // Quantidades
+  const qFS = parseInt($('#qty_fiveseven').value || '0', 10) || 0;
+  const qM = parseInt($('#qty_m1911').value || '0', 10) || 0;
+  const qMuniPT = parseInt($('#qty_muni_pt')?.value || '0', 10) || 0;
+  const qMuniSub = parseInt($('#qty_muni_sub')?.value || '0', 10) || 0;
+  const qMuniRifle = parseInt($('#qty_muni_rifle')?.value || '0', 10) || 0;
 
   const items = [];
-  if (qFS        > 0) items.push({ p: PRODUCTS.find(x => x.id === 'fiveseven'),  qty: qFS });
-  if (qM         > 0) items.push({ p: PRODUCTS.find(x => x.id === 'm1911'),      qty: qM  });
-  if (qMuniPT    > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_pt'),    qty: qMuniPT });
-  if (qMuniSub   > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_sub'),   qty: qMuniSub });
+  if (qFS > 0) items.push({ p: PRODUCTS.find(x => x.id === 'fiveseven'), qty: qFS });
+  if (qM > 0) items.push({ p: PRODUCTS.find(x => x.id === 'm1911'), qty: qM });
+  if (qMuniPT > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_pt'), qty: qMuniPT });
+  if (qMuniSub > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_sub'), qty: qMuniSub });
   if (qMuniRifle > 0) items.push({ p: PRODUCTS.find(x => x.id === 'muni_rifle'), qty: qMuniRifle });
 
   if (!items.length) {
     $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
     $('#materiais').innerHTML = '';
+    $('#excedentes').innerHTML = '';
     return;
   }
 
@@ -115,54 +116,46 @@ function calc() {
   let subtotal = 0;
   let pesoTotal = 0;
   const mats = {};
+  const excedentes = []; // lista detalhada de munições excedentes
 
   // Calcular linha por linha
   for (const { p, qty } of items) {
     const unitPrice = p.price * (1 - descontoPct / 100);
-
-    let produced = qty; // padrão
+    let produced = qty;
     let producedBatches = 1;
     let leftover = 0;
 
-    // para munições → calcular produção por lote
+    // Cálculo especial para munições
     if (p.category === 'Munições') {
       producedBatches = Math.ceil(qty / p.batch);
       produced = producedBatches * p.batch;
       leftover = produced - qty;
+      excedentes.push({ nome: p.name, produzido: produced, vendido: qty, sobra: leftover });
     }
 
     const lineTotal = unitPrice * qty;
     subtotal += lineTotal;
     pesoTotal += (p.weight || 0) * qty;
 
-    let line = `• ${qty} × ${p.name} = ${fmt(lineTotal)}`;
+    lines.push(`• ${qty} × ${p.name} = ${fmt(lineTotal)}`);
 
-    if (p.category === 'Munições' && leftover > 0) {
-      line += `\n Produzido ${produced} uni | Vendido ${qty} uni | Excedente ${leftover} uni`;
-    }
-
-    lines.push(line);
-
-    // calcular materiais
+    // Materiais
     const mm = clone(p.materials);
-    if (upgradeEntregue && mm['Upgrade pistola'] != null) {
-      delete mm['Upgrade pistola'];
-    }
+    if (upgradeEntregue && mm['Upgrade pistola'] != null) delete mm['Upgrade pistola'];
 
-    // para munições → usar número de produções completas
-    const productionMultiplier = (p.category === 'Munições') ? producedBatches : qty;
+    const multiplier = (p.category === 'Munições') ? producedBatches : qty;
     for (const [nome, base] of Object.entries(mm)) {
-      mats[nome] = (mats[nome] || 0) + base * productionMultiplier;
+      mats[nome] = (mats[nome] || 0) + base * multiplier;
     }
   }
 
-  // aplicar desconto fixo de upgrade
+  // Descontos e totais
   let total = subtotal;
   if (upgradeEntregue) total -= 10000;
   if (total < 0) total = 0;
   const valorSujo = total * 1.30;
 
-  // render
+  // Render principal
   const resumoHtml =
     lines.join('\n') +
     '\n\n' +
@@ -172,12 +165,22 @@ function calc() {
 
   $('#resultado').innerHTML = resumoHtml;
 
-  // materiais
+  // Lista de materiais
   const matsLines = Object.entries(mats)
     .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))
     .map(([nome, qtd]) => `<li>${nome}: ${qtd}</li>`)
     .join('');
   $('#materiais').innerHTML = matsLines || '';
+
+  // Bloco de munições excedentes
+  if (excedentes.length > 0) {
+    const excLines = excedentes.map(e =>
+      `<li>${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}</li>`
+    ).join('');
+    $('#excedentes').innerHTML = `<h3>Munições excedentes</h3><ul>${excLines}</ul>`;
+  } else {
+    $('#excedentes').innerHTML = '';
+  }
 }
 
 function clearAll() {
@@ -186,13 +189,14 @@ function clearAll() {
   $('#tipo').value = '0';
   $('#upgrade').checked = false;
 
-  ['qty_fiveseven','qty_m1911','qty_muni_pt','qty_muni_sub','qty_muni_rifle'].forEach(id => {
+  ['qty_fiveseven', 'qty_m1911', 'qty_muni_pt', 'qty_muni_sub', 'qty_muni_rifle'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '0';
   });
 
   $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
   $('#materiais').innerHTML = '';
+  $('#excedentes').innerHTML = '';
 }
 
 document.getElementById('calcular').addEventListener('click', calc);
