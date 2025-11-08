@@ -1,29 +1,36 @@
 // =================== CATÁLOGO ===================
 const PRODUCTS = [
-  // Pistolas
   {
     id: 'fiveseven',
     name: 'Five Seven',
+    category: 'Pistola',
     price: 80000,
     weight: 2.75,
+    batch: 1,
     materials: {
-      'Alumínio': 180,   // 150 + 30
-      'Cobre': 180,      // 150 + 30
-      'Vidro': 215,      // 175 + 40
+      'Alumínio': 180,
+      'Cobre': 180,
+      'Vidro': 215,
+      'Plástico': 215,
+      'Borracha': 215,
       'Corpo de pistola': 1,
-      'Plástico': 215,   // 175 + 40
-      'Borracha': 215,   // 175 + 40
       'Peças de armas': 3,
       'Engrenagem': 1,
       'Parafusos pequenos': 1,
       'Upgrade pistola': 1
+    },
+    materials_rules: {
+      omit_on_entrega: ['Upgrade pistola'],
+      omit_on_parceria_entrega: ['Upgrade pistola']
     }
   },
   {
     id: 'm1911',
     name: 'M1911',
+    category: 'Pistola',
     price: 67000,
     weight: 2.25,
+    batch: 1,
     materials: {
       'Alumínio': 150,
       'Cobre': 150,
@@ -34,23 +41,25 @@ const PRODUCTS = [
       'Peças de armas': 3
     }
   },
-
-  // Munições — cada quantidade = 1 lote (30 unidades)
   {
-    id: 'muni_pt',
+    id: 'munipt',
     name: 'Munição Pistola',
-    price: 15000,
-    weight: 0.025 * 30, // 30 unidades x 0,025 kg
+    category: 'Munições',
+    price: 150,
+    weight: 0.025,
+    batch: 30,
     materials: {
       'Cobre': 15,
       'Frascos de pólvora': 3
     }
   },
   {
-    id: 'muni_sub',
+    id: 'munisub',
     name: 'Munição Sub',
-    price: 20000,
-    weight: 0.025 * 30,
+    category: 'Munições',
+    price: 225,
+    weight: 0.025,
+    batch: 30,
     materials: {
       'Alumínio': 15,
       'Cobre': 15,
@@ -58,10 +67,12 @@ const PRODUCTS = [
     }
   },
   {
-    id: 'muni_rifle',
+    id: 'munirifle',
     name: 'Munição Rifle',
-    price: 25000,
-    weight: 0.025 * 30,
+    category: 'Munições',
+    price: 290,
+    weight: 0.025,
+    batch: 30,
     materials: {
       'Alumínio': 30,
       'Cobre': 30,
