@@ -166,22 +166,29 @@ function calc() {
   $('#resultado').innerHTML = resumoHtml;
 
   // Lista de materiais
-  const matsLines = Object.entries(mats)
-    .sort((a, b) => a[0].localeCompare(b[0], 'pt-BR'))
-    .map(([nome, qtd]) => `<li>${nome}: ${qtd}</li>`)
-    .join('');
-  $('#materiais').innerHTML = matsLines || '';
+  const matsText = Object.entries(mats)
+    .sort((a,b)=>a[0].localeCompare(b[0],'pt-BR'))
+    .map(([nome, qtd]) => `${nome}: ${qtd}`)
+    .join('\n');
+  $('#materiais').textContent = matsText || '—';
 
   // Bloco de munições excedentes
+  const excedentesWrap = document.getElementById('excedentes-wrap');
+
   if (excedentes.length > 0) {
-    const excLines = excedentes.map(e =>
-      `<li>${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}</li>`
-    ).join('');
-    $('#excedentes').innerHTML = `<h3>Munições excedentes</h3><ul>${excLines}</ul>`;
+    // Gera o texto com quebras de linha no mesmo formato do orçamento
+    const excText = excedentes.map(e =>
+      `${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`
+    ).join('\n');
+
+    // Mostra o bloco e insere o texto formatado
+    excedentesWrap.style.display = '';
+    $('#excedentes').textContent = excText;
   } else {
-    $('#excedentes').innerHTML = '';
+    // Esconde o bloco se não houver excedentes
+    excedentesWrap.style.display = 'none';
+    $('#excedentes').textContent = '';
   }
-}
 
 function clearAll() {
   $('#comprador').value = '';
