@@ -38,7 +38,7 @@ const PRODUCTS = [
   // Munições — cada quantidade = 1 lote (30 unidades)
   {
     id: 'muni_pt',
-    name: 'Munição Pistola (x30)',
+    name: 'Munição Pistola',
     price: 15000,
     weight: 0.025 * 30, // 30 unidades x 0,025 kg
     materials: {
@@ -48,7 +48,7 @@ const PRODUCTS = [
   },
   {
     id: 'muni_sub',
-    name: 'Munição Sub (x30)',
+    name: 'Munição Sub',
     price: 20000,
     weight: 0.025 * 30,
     materials: {
@@ -59,7 +59,7 @@ const PRODUCTS = [
   },
   {
     id: 'muni_rifle',
-    name: 'Munição Rifle (x30)',
+    name: 'Munição Rifle',
     price: 25000,
     weight: 0.025 * 30,
     materials: {
