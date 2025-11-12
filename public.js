@@ -90,7 +90,7 @@ const clone = (o) => JSON.parse(JSON.stringify(o));
 
 /**
  * Resolve descontos para geral (armas/outros) e munição.
- * Valores positivos = desconto.
+ * Valores positivos = desconto; valores negativos = sobretaxa.
  * tipo:
  *  - base .................. 0%
  *  - parceria .............. 7.5%
@@ -174,8 +174,8 @@ function calc() {
 
   if (!items.length) {
     $('#resultado').innerHTML = '<p class="small">Preencha as quantidades e clique em <strong>Calcular</strong>.</p>';
-    matsBox.textContent = '';
-    excBox.textContent  = '';
+    if (matsBox) matsBox.textContent = '';
+    if (excBox)  excBox.textContent  = '';
     if (excWrap) excWrap.style.display = 'none';
     return;
   }
@@ -192,7 +192,6 @@ function calc() {
 
   // ——— Cálculo por item ———
   for (const { p, qty } of items) {
-    // Detecta munição de forma robusta
     const isAmmo = p.id.startsWith('muni_');
     const descontoAplicado = isAmmo ? descontoMunicao : descontoGeral;
 
@@ -210,7 +209,14 @@ function calc() {
     }
 
     // Preço unitário considerando desconto
-    const unitPrice = p.price * (1 - descontoAplicado / 100);
+    let unitPrice = p.price * (1 - descontoAplicado / 100);
+
+    // ——— Desconto fixo de upgrade: –$10.000 aplicado no UNITÁRIO da Five Seven ———
+    if (upgradeEntregue && p.id === 'fiveseven') {
+      unitPrice -= 10000;
+      if (unitPrice < 0) unitPrice = 0;
+    }
+
     const lineTotal = unitPrice * qty;
 
     subtotal  += lineTotal;
@@ -232,7 +238,6 @@ function calc() {
 
   // ——— Totais finais ———
   let total = subtotal;
-  if (upgradeEntregue) total -= 10000;
   if (total < 0) total = 0;
 
   const valorSujo = total * 1.30;
@@ -253,17 +258,17 @@ function calc() {
     .map(([nome, qtd]) => `• ${nome}: ${qtd}`)
     .join('\n');
 
-  matsBox.textContent = matsText || '—';
+  if (matsBox) matsBox.textContent = matsText || '—';
 
   // ——— Render: Excedentes ———
   if (excedentes.length > 0) {
     const excText = excedentes
       .map(e => `• ${e.nome}: Produzido ${e.produzido} | Vendido ${e.vendido} | Excedente ${e.sobra}`)
       .join('\n');
-    excBox.textContent = excText;
+    if (excBox)  excBox.textContent = excText;
     if (excWrap) excWrap.style.display = '';
   } else {
-    excBox.textContent = '';
+    if (excBox)  excBox.textContent = '';
     if (excWrap) excWrap.style.display = 'none';
   }
 }
