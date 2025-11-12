@@ -90,7 +90,7 @@ const clone = (o) => JSON.parse(JSON.stringify(o));
 
 /**
  * Resolve descontos para geral (armas/outros) e munição.
- * Valores positivos = desconto; valores negativos = sobretaxa.
+ * Valores positivos = desconto.
  * tipo:
  *  - base .................. 0%
  *  - parceria .............. 7.5%
@@ -295,3 +295,4 @@ function clearAll() {
 
 document.getElementById('calcular').addEventListener('click', calc);
 document.getElementById('limpar').addEventListener('click', clearAll);
+
